@@ -46,10 +46,6 @@ builder.Services.AddIdentityApiEndpoints<IdentityUser>(options =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<IAuthenticationService, AspNetIdentityAuthenticationService>();
 
-// Register application repositories.
-// By default, use an in-memory repository for example objects.
-builder.Services.AddTransient<IExampleObjectRepository, MemoryExampleObjectRepository>();
-
 // To use a SQL-backed repository instead, uncomment the following line:
 //builder.Services.AddTransient<IExampleObjectRepository, SqlExampleObjectRepository>(o => new SqlExampleObjectRepository(sqlConnectionString!));
 
