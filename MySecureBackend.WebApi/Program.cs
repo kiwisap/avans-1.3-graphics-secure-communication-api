@@ -53,6 +53,13 @@ builder.Services.AddTransient<IExampleObjectRepository, MemoryExampleObjectRepos
 // To use a SQL-backed repository instead, uncomment the following line:
 //builder.Services.AddTransient<IExampleObjectRepository, SqlExampleObjectRepository>(o => new SqlExampleObjectRepository(sqlConnectionString!));
 
+// Register repositories for Environment2D and Object2D with SQL backend
+if (sqlConnectionStringFound)
+{
+    builder.Services.AddTransient<IEnvironment2DRepository>(o => new SqlEnvironment2DRepository(sqlConnectionString!));
+    builder.Services.AddTransient<IObject2DRepository>(o => new SqlObject2DRepository(sqlConnectionString!));
+}
+
 var app = builder.Build();
 
 // Register OpenAPI/Swagger endpoints.
@@ -82,12 +89,14 @@ else
 // Enforce HTTPS for all requests.
 app.UseHttpsRedirection();
 
+// Enable authentication middleware.
+app.UseAuthentication();
+
 // Enable authorization middleware.
 app.UseAuthorization();
 
 // Register Identity endpoints for account management (register, login, etc.) under /account.
-// 👇 uncomment the following line to enable Identity API endpoints to use authentication/authorization
-//app.MapGroup("/account").MapIdentityApi<IdentityUser>().WithTags("Account");
+app.MapGroup("/account").MapIdentityApi<IdentityUser>().WithTags("Account");
 
 // Register all controller endpoints for the application.
 app.MapControllers();
