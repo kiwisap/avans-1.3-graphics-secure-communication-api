@@ -1,4 +1,4 @@
-namespace MySecureBackend.WebApi.Models;
+namespace GraphicsSecureCommunicationApi.WebApi.Models;
 
 public class Object2D
 {

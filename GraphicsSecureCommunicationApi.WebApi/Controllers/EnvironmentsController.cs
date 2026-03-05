@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MySecureBackend.WebApi.Models;
-using MySecureBackend.WebApi.Repositories;
-using MySecureBackend.WebApi.Services;
+using GraphicsSecureCommunicationApi.WebApi.Models;
+using GraphicsSecureCommunicationApi.WebApi.Repositories;
+using GraphicsSecureCommunicationApi.WebApi.Services;
 
-namespace MySecureBackend.WebApi.Controllers;
+namespace GraphicsSecureCommunicationApi.WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

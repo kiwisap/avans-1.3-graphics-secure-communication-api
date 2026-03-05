@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Http;
 using Moq;
-using MySecureBackend.WebApi.Services;
+using GraphicsSecureCommunicationApi.WebApi.Services;
 using System.Security.Claims;
 
-namespace MySecureBackend.Tests;
+namespace GraphicsSecureCommunicationApi.Tests;
 
 [TestClass]
 public sealed class AspNetIdentityAuthenticationServiceTests

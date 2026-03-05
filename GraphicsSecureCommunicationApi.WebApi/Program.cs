@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi;
-using MySecureBackend.WebApi.Repositories;
-using MySecureBackend.WebApi.Services;
+using GraphicsSecureCommunicationApi.WebApi.Repositories;
+using GraphicsSecureCommunicationApi.WebApi.Services;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,7 +19,7 @@ builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "MySecureBackend API",
+        Title = "Graphics Secure Communication API",
         Version = "v1",
     });
 });
@@ -67,7 +67,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "MySecureBackend API v1");
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Graphics Secure Communication API v1");
         options.RoutePrefix = "swagger"; // Access at /swagger
         options.CacheLifetime = TimeSpan.Zero; // Disable caching for development
 

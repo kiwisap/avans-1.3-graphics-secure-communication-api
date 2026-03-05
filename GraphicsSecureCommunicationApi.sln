@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.1.11312.151 d18.0
+VisualStudioVersion = 18.1.11312.151
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MySecureBackend.WebApi", "MySecureBackend.WebApi\MySecureBackend.WebApi.csproj", "{977C502C-8275-4B1D-820E-3FE0E2059658}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphicsSecureCommunicationApi.WebApi", "GraphicsSecureCommunicationApi.WebApi\GraphicsSecureCommunicationApi.WebApi.csproj", "{977C502C-8275-4B1D-820E-3FE0E2059658}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MySecureBackend.Tests", "MySecureBackend.Tests\MySecureBackend.Tests.csproj", "{D304675F-DBF9-41F5-B490-8C5FEF4CC6A6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphicsSecureCommunicationApi.Tests", "GraphicsSecureCommunicationApi.Tests\GraphicsSecureCommunicationApi.Tests.csproj", "{D304675F-DBF9-41F5-B490-8C5FEF4CC6A6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Files", "Solution Files", "{F874DEB3-668D-4F21-AB84-491F1649FEBC}"
 	ProjectSection(SolutionItems) = preProject

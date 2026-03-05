@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using MySecureBackend.WebApi.Controllers;
-using MySecureBackend.WebApi.Models;
-using MySecureBackend.WebApi.Repositories;
-using MySecureBackend.WebApi.Services;
+using GraphicsSecureCommunicationApi.WebApi.Controllers;
+using GraphicsSecureCommunicationApi.WebApi.Models;
+using GraphicsSecureCommunicationApi.WebApi.Repositories;
+using GraphicsSecureCommunicationApi.WebApi.Services;
 
-namespace MySecureBackend.Tests;
+namespace GraphicsSecureCommunicationApi.Tests;
 
 [TestClass]
 public sealed class EnvironmentsControllerTests

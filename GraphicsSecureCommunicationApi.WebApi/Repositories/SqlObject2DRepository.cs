@@ -1,8 +1,8 @@
 using Dapper;
 using Microsoft.Data.SqlClient;
-using MySecureBackend.WebApi.Models;
+using GraphicsSecureCommunicationApi.WebApi.Models;
 
-namespace MySecureBackend.WebApi.Repositories;
+namespace GraphicsSecureCommunicationApi.WebApi.Repositories;
 
 public class SqlObject2DRepository : IObject2DRepository
 {

@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MySecureBackend.WebApi\MySecureBackend.WebApi.csproj" />
+    <ProjectReference Include="..\GraphicsSecureCommunicationApi.WebApi\GraphicsSecureCommunicationApi.WebApi.csproj" />
   </ItemGroup>
 
   <ItemGroup>
