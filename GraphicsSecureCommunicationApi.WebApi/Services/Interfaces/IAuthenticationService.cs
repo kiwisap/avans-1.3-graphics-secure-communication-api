@@ -1,4 +1,4 @@
-﻿namespace GraphicsSecureCommunicationApi.WebApi.Services;
+﻿namespace GraphicsSecureCommunicationApi.WebApi.Services.Interfaces;
 
 public interface IAuthenticationService
 {

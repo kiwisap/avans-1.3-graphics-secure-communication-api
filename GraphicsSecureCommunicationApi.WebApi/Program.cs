@@ -2,7 +2,11 @@
 using Microsoft.OpenApi;
 using GraphicsSecureCommunicationApi.WebApi.Repositories;
 using GraphicsSecureCommunicationApi.WebApi.Services;
+using GraphicsSecureCommunicationApi.WebApi.Mapping;
 using System.Reflection;
+using GraphicsSecureCommunicationApi.WebApi.Mapping.Interfaces;
+using GraphicsSecureCommunicationApi.WebApi.Repositories.Interfaces;
+using GraphicsSecureCommunicationApi.WebApi.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,11 +56,21 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
 });
 
+// Register mapping services
+builder.Services.AddTransient<IEnvironment2DMappingService, Environment2DMappingService>();
+builder.Services.AddTransient<IObject2DMappingService, Object2DMappingService>();
+
 // Register repositories for Environment2D and Object2D with SQL backend
 if (sqlConnectionStringFound)
 {
-    builder.Services.AddTransient<IEnvironment2DRepository>(o => new SqlEnvironment2DRepository(sqlConnectionString!));
-    builder.Services.AddTransient<IObject2DRepository>(o => new SqlObject2DRepository(sqlConnectionString!));
+    builder.Services.AddTransient<IEnvironment2DRepository>(o => 
+        new SqlEnvironment2DRepository(
+            sqlConnectionString!, 
+            o.GetRequiredService<IEnvironment2DMappingService>()));
+    builder.Services.AddTransient<IObject2DRepository>(o => 
+        new SqlObject2DRepository(
+            sqlConnectionString!, 
+            o.GetRequiredService<IObject2DMappingService>()));
 }
 
 var app = builder.Build();

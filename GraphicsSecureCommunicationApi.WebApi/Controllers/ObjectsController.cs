@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using GraphicsSecureCommunicationApi.WebApi.Models;
-using GraphicsSecureCommunicationApi.WebApi.Repositories;
-using GraphicsSecureCommunicationApi.WebApi.Services;
+using GraphicsSecureCommunicationApi.WebApi.Models.Dto;
+using GraphicsSecureCommunicationApi.WebApi.Repositories.Interfaces;
+using GraphicsSecureCommunicationApi.WebApi.Services.Interfaces;
 
 namespace GraphicsSecureCommunicationApi.WebApi.Controllers;
 
@@ -21,7 +21,7 @@ public class ObjectsController : ControllerBase
     }
 
     [HttpGet("environment/{environmentId}")]
-    public async Task<ActionResult<IEnumerable<Object2D>>> GetByEnvironmentId(int environmentId)
+    public async Task<ActionResult<IEnumerable<Object2DDto>>> GetByEnvironmentId(int environmentId)
     {
         var userId = _authService.GetCurrentAuthenticatedUserId();
         if (string.IsNullOrEmpty(userId))
@@ -32,7 +32,7 @@ public class ObjectsController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Object2D>> GetById(int id)
+    public async Task<ActionResult<Object2DDto>> GetById(int id)
     {
         var userId = _authService.GetCurrentAuthenticatedUserId();
         if (string.IsNullOrEmpty(userId))
@@ -46,7 +46,7 @@ public class ObjectsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Object2D>> Create(Object2D obj)
+    public async Task<ActionResult<Object2DDto>> Create(Object2DDto obj)
     {
         var userId = _authService.GetCurrentAuthenticatedUserId();
         if (string.IsNullOrEmpty(userId))
@@ -64,7 +64,7 @@ public class ObjectsController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, Object2D obj)
+    public async Task<IActionResult> Update(int id, Object2DDto obj)
     {
         var userId = _authService.GetCurrentAuthenticatedUserId();
         if (string.IsNullOrEmpty(userId))

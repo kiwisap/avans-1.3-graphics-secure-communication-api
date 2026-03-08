@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using GraphicsSecureCommunicationApi.WebApi.Controllers;
-using GraphicsSecureCommunicationApi.WebApi.Models;
-using GraphicsSecureCommunicationApi.WebApi.Repositories;
-using GraphicsSecureCommunicationApi.WebApi.Services;
+using GraphicsSecureCommunicationApi.WebApi.Models.Dto;
+using GraphicsSecureCommunicationApi.WebApi.Repositories.Interfaces;
+using GraphicsSecureCommunicationApi.WebApi.Services.Interfaces;
 
 namespace GraphicsSecureCommunicationApi.Tests;
 
@@ -29,10 +29,10 @@ public sealed class EnvironmentsControllerTests
     public async Task GetAll_WithAuthenticatedUser_ReturnsOkWithEnvironments()
     {
         // Arrange
-        var environments = new List<Environment2D>
+        var environments = new List<Environment2DDto>
         {
-            new() { Id = 1, Name = "Test Env 1", MaxHeight = 100, MaxLength = 100, UserId = TestUserId },
-            new() { Id = 2, Name = "Test Env 2", MaxHeight = 200, MaxLength = 200, UserId = TestUserId }
+            new() { Id = 1, Name = "Test Env 1", MaxHeight = 100, MaxLength = 100 },
+            new() { Id = 2, Name = "Test Env 2", MaxHeight = 200, MaxLength = 200 }
         };
         
         _repository.Setup(x => x.GetAllByUserIdAsync(TestUserId)).ReturnsAsync(environments);
@@ -44,7 +44,7 @@ public sealed class EnvironmentsControllerTests
         Assert.IsInstanceOfType<OkObjectResult>(result.Result);
         var okResult = result.Result as OkObjectResult;
         Assert.IsNotNull(okResult);
-        var returnedEnvironments = okResult.Value as IEnumerable<Environment2D>;
+        var returnedEnvironments = okResult.Value as IEnumerable<Environment2DDto>;
         Assert.IsNotNull(returnedEnvironments);
         Assert.AreEqual(2, returnedEnvironments.Count());
     }
@@ -66,13 +66,12 @@ public sealed class EnvironmentsControllerTests
     public async Task GetById_WithValidId_ReturnsOkWithEnvironment()
     {
         // Arrange
-        var environment = new Environment2D 
+        var environment = new Environment2DDto 
         { 
             Id = 1, 
             Name = "Test Env", 
             MaxHeight = 100, 
-            MaxLength = 100, 
-            UserId = TestUserId 
+            MaxLength = 100
         };
         
         _repository.Setup(x => x.GetByIdAsync(1, TestUserId)).ReturnsAsync(environment);
@@ -84,7 +83,7 @@ public sealed class EnvironmentsControllerTests
         Assert.IsInstanceOfType<OkObjectResult>(result.Result);
         var okResult = result.Result as OkObjectResult;
         Assert.IsNotNull(okResult);
-        var returnedEnvironment = okResult.Value as Environment2D;
+        var returnedEnvironment = okResult.Value as Environment2DDto;
         Assert.IsNotNull(returnedEnvironment);
         Assert.AreEqual(1, returnedEnvironment.Id);
     }
@@ -93,7 +92,7 @@ public sealed class EnvironmentsControllerTests
     public async Task GetById_WithInvalidId_ReturnsNotFound()
     {
         // Arrange
-        _repository.Setup(x => x.GetByIdAsync(999, TestUserId)).ReturnsAsync(null as Environment2D);
+        _repository.Setup(x => x.GetByIdAsync(999, TestUserId)).ReturnsAsync(null as Environment2DDto);
 
         // Act
         var result = await _controller.GetById(999);
@@ -119,23 +118,22 @@ public sealed class EnvironmentsControllerTests
     public async Task Create_WithValidEnvironment_ReturnsCreatedAtAction()
     {
         // Arrange
-        var newEnvironment = new Environment2D 
+        var newEnvironment = new Environment2DDto 
         { 
             Name = "New Env", 
             MaxHeight = 150, 
             MaxLength = 150 
         };
-        
-        var createdEnvironment = new Environment2D 
+
+        var createdEnvironment = new Environment2DDto 
         { 
             Id = 1, 
             Name = "New Env", 
             MaxHeight = 150, 
-            MaxLength = 150, 
-            UserId = TestUserId 
+            MaxLength = 150
         };
-        
-        _repository.Setup(x => x.CreateAsync(It.IsAny<Environment2D>())).ReturnsAsync(createdEnvironment);
+
+        _repository.Setup(x => x.CreateAsync(It.IsAny<Environment2DDto>(), TestUserId)).ReturnsAsync(createdEnvironment);
 
         // Act
         var result = await _controller.Create(newEnvironment);
@@ -145,9 +143,9 @@ public sealed class EnvironmentsControllerTests
         var createdResult = result.Result as CreatedAtActionResult;
         Assert.IsNotNull(createdResult);
         Assert.AreEqual(nameof(_controller.GetById), createdResult.ActionName);
-        var returnedEnvironment = createdResult.Value as Environment2D;
+        var returnedEnvironment = createdResult.Value as Environment2DDto;
         Assert.IsNotNull(returnedEnvironment);
-        Assert.AreEqual(TestUserId, returnedEnvironment.UserId);
+        Assert.AreEqual(1, returnedEnvironment.Id);
     }
 
     [TestMethod]
@@ -155,7 +153,7 @@ public sealed class EnvironmentsControllerTests
     {
         // Arrange
         _authService.Setup(x => x.GetCurrentAuthenticatedUserId()).Returns(null as string);
-        var newEnvironment = new Environment2D { Name = "New Env", MaxHeight = 150, MaxLength = 150 };
+        var newEnvironment = new Environment2DDto { Name = "New Env", MaxHeight = 150, MaxLength = 150 };
 
         // Act
         var result = await _controller.Create(newEnvironment);
@@ -168,13 +166,12 @@ public sealed class EnvironmentsControllerTests
     public async Task Update_WithValidEnvironment_ReturnsNoContent()
     {
         // Arrange
-        var environment = new Environment2D 
+        var environment = new Environment2DDto 
         { 
             Id = 1, 
             Name = "Updated Env", 
             MaxHeight = 200, 
-            MaxLength = 200, 
-            UserId = TestUserId 
+            MaxLength = 200
         };
         
         _repository.Setup(x => x.UpdateAsync(environment, TestUserId)).ReturnsAsync(true);
@@ -190,7 +187,7 @@ public sealed class EnvironmentsControllerTests
     public async Task Update_WithMismatchedId_ReturnsBadRequest()
     {
         // Arrange
-        var environment = new Environment2D 
+        var environment = new Environment2DDto 
         { 
             Id = 2, 
             Name = "Updated Env", 
@@ -209,7 +206,7 @@ public sealed class EnvironmentsControllerTests
     public async Task Update_WithNonExistentEnvironment_ReturnsNotFound()
     {
         // Arrange
-        var environment = new Environment2D 
+        var environment = new Environment2DDto 
         { 
             Id = 999, 
             Name = "Updated Env", 

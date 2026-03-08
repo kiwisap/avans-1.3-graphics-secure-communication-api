@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using GraphicsSecureCommunicationApi.WebApi.Models;
-using GraphicsSecureCommunicationApi.WebApi.Repositories;
-using GraphicsSecureCommunicationApi.WebApi.Services;
+using GraphicsSecureCommunicationApi.WebApi.Models.Dto;
+using GraphicsSecureCommunicationApi.WebApi.Repositories.Interfaces;
+using GraphicsSecureCommunicationApi.WebApi.Services.Interfaces;
 
 namespace GraphicsSecureCommunicationApi.WebApi.Controllers;
 
@@ -21,7 +21,7 @@ public class EnvironmentsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Environment2D>>> GetAll()
+    public async Task<ActionResult<IEnumerable<Environment2DDto>>> GetAll()
     {
         var userId = _authService.GetCurrentAuthenticatedUserId();
         if (string.IsNullOrEmpty(userId))
@@ -32,7 +32,7 @@ public class EnvironmentsController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Environment2D>> GetById(int id)
+    public async Task<ActionResult<Environment2DDto>> GetById(int id)
     {
         var userId = _authService.GetCurrentAuthenticatedUserId();
         if (string.IsNullOrEmpty(userId))
@@ -46,19 +46,18 @@ public class EnvironmentsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Environment2D>> Create(Environment2D environment)
+    public async Task<ActionResult<Environment2DDto>> Create(Environment2DDto environment)
     {
         var userId = _authService.GetCurrentAuthenticatedUserId();
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        environment.UserId = userId;
-        var created = await _repository.CreateAsync(environment);
+        var created = await _repository.CreateAsync(environment, userId);
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, Environment2D environment)
+    public async Task<IActionResult> Update(int id, Environment2DDto environment)
     {
         var userId = _authService.GetCurrentAuthenticatedUserId();
         if (string.IsNullOrEmpty(userId))

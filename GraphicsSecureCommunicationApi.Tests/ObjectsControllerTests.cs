@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using GraphicsSecureCommunicationApi.WebApi.Controllers;
-using GraphicsSecureCommunicationApi.WebApi.Models;
-using GraphicsSecureCommunicationApi.WebApi.Repositories;
-using GraphicsSecureCommunicationApi.WebApi.Services;
+using GraphicsSecureCommunicationApi.WebApi.Models.Dto;
+using GraphicsSecureCommunicationApi.WebApi.Repositories.Interfaces;
+using GraphicsSecureCommunicationApi.WebApi.Services.Interfaces;
 
 namespace GraphicsSecureCommunicationApi.Tests;
 
@@ -29,7 +29,7 @@ public sealed class ObjectsControllerTests
     public async Task GetByEnvironmentId_WithValidId_ReturnsOkWithObjects()
     {
         // Arrange
-        var objects = new List<Object2D>
+        var objects = new List<Object2DDto>
         {
             new() { Id = 1, EnvironmentId = 1, PositionX = 10, PositionY = 20 },
             new() { Id = 2, EnvironmentId = 1, PositionX = 30, PositionY = 40 }
@@ -44,7 +44,7 @@ public sealed class ObjectsControllerTests
         Assert.IsInstanceOfType<OkObjectResult>(result.Result);
         var okResult = result.Result as OkObjectResult;
         Assert.IsNotNull(okResult);
-        var returnedObjects = okResult.Value as IEnumerable<Object2D>;
+        var returnedObjects = okResult.Value as IEnumerable<Object2DDto>;
         Assert.IsNotNull(returnedObjects);
         Assert.AreEqual(2, returnedObjects.Count());
     }
@@ -66,7 +66,7 @@ public sealed class ObjectsControllerTests
     public async Task GetById_WithValidId_ReturnsOkWithObject()
     {
         // Arrange
-        var obj = new Object2D 
+        var obj = new Object2DDto 
         { 
             Id = 1, 
             EnvironmentId = 1, 
@@ -83,7 +83,7 @@ public sealed class ObjectsControllerTests
         Assert.IsInstanceOfType<OkObjectResult>(result.Result);
         var okResult = result.Result as OkObjectResult;
         Assert.IsNotNull(okResult);
-        var returnedObject = okResult.Value as Object2D;
+        var returnedObject = okResult.Value as Object2DDto;
         Assert.IsNotNull(returnedObject);
         Assert.AreEqual(1, returnedObject.Id);
     }
@@ -92,7 +92,7 @@ public sealed class ObjectsControllerTests
     public async Task GetById_WithInvalidId_ReturnsNotFound()
     {
         // Arrange
-        _repository.Setup(x => x.GetByIdAsync(999, TestUserId)).ReturnsAsync(null as Object2D);
+        _repository.Setup(x => x.GetByIdAsync(999, TestUserId)).ReturnsAsync(null as Object2DDto);
 
         // Act
         var result = await _controller.GetById(999);
@@ -118,7 +118,7 @@ public sealed class ObjectsControllerTests
     public async Task Create_WithValidObject_ReturnsCreatedAtAction()
     {
         // Arrange
-        var newObject = new Object2D 
+        var newObject = new Object2DDto 
         { 
             EnvironmentId = 1, 
             PositionX = 10, 
@@ -126,8 +126,8 @@ public sealed class ObjectsControllerTests
             ScaleX = 1,
             ScaleY = 1
         };
-        
-        var createdObject = new Object2D 
+
+        var createdObject = new Object2DDto 
         { 
             Id = 1, 
             EnvironmentId = 1, 
@@ -136,8 +136,8 @@ public sealed class ObjectsControllerTests
             ScaleX = 1,
             ScaleY = 1
         };
-        
-        _repository.Setup(x => x.CreateAsync(It.IsAny<Object2D>(), TestUserId)).ReturnsAsync(createdObject);
+
+        _repository.Setup(x => x.CreateAsync(It.IsAny<Object2DDto>(), TestUserId)).ReturnsAsync(createdObject);
 
         // Act
         var result = await _controller.Create(newObject);
@@ -153,9 +153,9 @@ public sealed class ObjectsControllerTests
     public async Task Create_WithUnauthorizedEnvironment_ReturnsUnauthorized()
     {
         // Arrange
-        var newObject = new Object2D { EnvironmentId = 1, PositionX = 10, PositionY = 20 };
-        
-        _repository.Setup(x => x.CreateAsync(It.IsAny<Object2D>(), TestUserId))
+        var newObject = new Object2DDto { EnvironmentId = 1, PositionX = 10, PositionY = 20 };
+
+        _repository.Setup(x => x.CreateAsync(It.IsAny<Object2DDto>(), TestUserId))
             .ThrowsAsync(new UnauthorizedAccessException("You don't have access to this environment."));
 
         // Act
@@ -170,7 +170,7 @@ public sealed class ObjectsControllerTests
     {
         // Arrange
         _authService.Setup(x => x.GetCurrentAuthenticatedUserId()).Returns(null as string);
-        var newObject = new Object2D { EnvironmentId = 1, PositionX = 10, PositionY = 20 };
+        var newObject = new Object2DDto { EnvironmentId = 1, PositionX = 10, PositionY = 20 };
 
         // Act
         var result = await _controller.Create(newObject);
@@ -183,7 +183,7 @@ public sealed class ObjectsControllerTests
     public async Task Update_WithValidObject_ReturnsNoContent()
     {
         // Arrange
-        var obj = new Object2D 
+        var obj = new Object2DDto 
         { 
             Id = 1, 
             EnvironmentId = 1, 
@@ -204,7 +204,7 @@ public sealed class ObjectsControllerTests
     public async Task Update_WithMismatchedId_ReturnsBadRequest()
     {
         // Arrange
-        var obj = new Object2D { Id = 2, EnvironmentId = 1, PositionX = 15, PositionY = 25 };
+        var obj = new Object2DDto { Id = 2, EnvironmentId = 1, PositionX = 15, PositionY = 25 };
 
         // Act
         var result = await _controller.Update(1, obj);
@@ -217,7 +217,7 @@ public sealed class ObjectsControllerTests
     public async Task Update_WithNonExistentObject_ReturnsNotFound()
     {
         // Arrange
-        var obj = new Object2D { Id = 999, EnvironmentId = 1, PositionX = 15, PositionY = 25 };
+        var obj = new Object2DDto { Id = 999, EnvironmentId = 1, PositionX = 15, PositionY = 25 };
         
         _repository.Setup(x => x.UpdateAsync(obj, TestUserId)).ReturnsAsync(false);
 
@@ -233,7 +233,7 @@ public sealed class ObjectsControllerTests
     {
         // Arrange
         _authService.Setup(x => x.GetCurrentAuthenticatedUserId()).Returns(null as string);
-        var obj = new Object2D { Id = 1, EnvironmentId = 1, PositionX = 15, PositionY = 25 };
+        var obj = new Object2DDto { Id = 1, EnvironmentId = 1, PositionX = 15, PositionY = 25 };
 
         // Act
         var result = await _controller.Update(1, obj);
