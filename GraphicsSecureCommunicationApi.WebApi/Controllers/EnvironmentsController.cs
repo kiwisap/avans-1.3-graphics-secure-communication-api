@@ -56,7 +56,7 @@ public class EnvironmentsController : ControllerBase
             var created = await _service.CreateAsync(environment, userId);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
-        catch (ArgumentException ex)
+        catch (Exception ex) when (ex is InvalidOperationException || ex is ArgumentException)
         {
             return BadRequest(ex.Message);
         }

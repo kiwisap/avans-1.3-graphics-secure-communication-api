@@ -6,12 +6,15 @@ namespace GraphicsSecureCommunicationApi.WebApi.Services;
 
 public class Environment2DService : IEnvironment2DService
 {
-    private readonly IEnvironment2DRepository _repository;
-
     private const int MinMaxLength = 20;
     private const int MaxMaxLength = 100;
     private const int MinMaxHeight = 10;
     private const int MaxMaxHeight = 100;
+    private const int MinNameLength = 1;
+    private const int MaxNameLength = 25;
+    private const int MaxEnvironmentsPerUser = 5;
+
+    private readonly IEnvironment2DRepository _repository;
 
     public Environment2DService(IEnvironment2DRepository repository)
     {
@@ -31,8 +34,9 @@ public class Environment2DService : IEnvironment2DService
     public async Task<Environment2DDto> CreateAsync(Environment2DDto environment, string userId)
     {
         ValidateEnvironment(environment);
-        
+
         await ValidateUniqueNameAsync(environment.Name, userId);
+        await ValidateMaxEnvironmentsAsync(userId);
 
         return await _repository.CreateAsync(environment, userId);
     }
@@ -59,8 +63,10 @@ public class Environment2DService : IEnvironment2DService
         if (string.IsNullOrWhiteSpace(environment.Name))
             throw new ArgumentException("Environment name is required.", nameof(environment.Name));
 
-        if (environment.Name.Length > 50)
-            throw new ArgumentException("Environment name cannot exceed 50 characters.", nameof(environment.Name));
+        if (environment.Name.Length < MinNameLength || environment.Name.Length > MaxNameLength)
+            throw new ArgumentException(
+                $"Environment name must be between {MinNameLength} and {MaxNameLength} characters.", 
+                nameof(environment.Name));
 
         if (environment.MaxLength < MinMaxLength || environment.MaxLength > MaxMaxLength)
             throw new ArgumentException(
@@ -87,5 +93,15 @@ public class Environment2DService : IEnvironment2DService
             throw new ArgumentException(
                 $"An environment with the name '{name}' already exists.", 
                 nameof(name));
+    }
+
+    private async Task ValidateMaxEnvironmentsAsync(string userId)
+    {
+        var existingEnvironments = await _repository.GetAllByUserIdAsync(userId);
+        var environmentCount = existingEnvironments.Count();
+
+        if (environmentCount >= MaxEnvironmentsPerUser)
+            throw new InvalidOperationException(
+                $"You have reached the maximum limit of {MaxEnvironmentsPerUser} environments. Please delete an existing environment before creating a new one.");
     }
 }
