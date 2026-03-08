@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using GraphicsSecureCommunicationApi.WebApi.Models.Dto;
-using GraphicsSecureCommunicationApi.WebApi.Repositories.Interfaces;
 using GraphicsSecureCommunicationApi.WebApi.Services.Interfaces;
 
 namespace GraphicsSecureCommunicationApi.WebApi.Controllers;
@@ -11,12 +10,12 @@ namespace GraphicsSecureCommunicationApi.WebApi.Controllers;
 [Authorize]
 public class ObjectsController : ControllerBase
 {
-    private readonly IObject2DRepository _repository;
+    private readonly IObject2DService _service;
     private readonly IAuthenticationService _authService;
 
-    public ObjectsController(IObject2DRepository repository, IAuthenticationService authService)
+    public ObjectsController(IObject2DService service, IAuthenticationService authService)
     {
-        _repository = repository;
+        _service = service;
         _authService = authService;
     }
 
@@ -27,7 +26,7 @@ public class ObjectsController : ControllerBase
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var objects = await _repository.GetAllByEnvironmentIdAsync(environmentId, userId);
+        var objects = await _service.GetAllByEnvironmentIdAsync(environmentId, userId);
         return Ok(objects);
     }
 
@@ -38,7 +37,7 @@ public class ObjectsController : ControllerBase
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var obj = await _repository.GetByIdAsync(id, userId);
+        var obj = await _service.GetByIdAsync(id, userId);
         if (obj == null)
             return NotFound();
 
@@ -54,12 +53,12 @@ public class ObjectsController : ControllerBase
 
         try
         {
-            var created = await _repository.CreateAsync(obj, userId);
+            var created = await _service.CreateAsync(obj, userId);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
-        catch (UnauthorizedAccessException)
+        catch (ArgumentException ex)
         {
-            return Unauthorized("You don't have access to this environment.");
+            return BadRequest(ex.Message);
         }
     }
 
@@ -71,13 +70,20 @@ public class ObjectsController : ControllerBase
             return Unauthorized();
 
         if (id != obj.Id)
-            return BadRequest();
+            return BadRequest("ID mismatch.");
 
-        var success = await _repository.UpdateAsync(obj, userId);
-        if (!success)
-            return NotFound();
+        try
+        {
+            var success = await _service.UpdateAsync(obj, userId);
+            if (!success)
+                return NotFound();
 
-        return NoContent();
+            return NoContent();
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpDelete("{id}")]
@@ -87,7 +93,7 @@ public class ObjectsController : ControllerBase
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var success = await _repository.DeleteAsync(id, userId);
+        var success = await _service.DeleteAsync(id, userId);
         if (!success)
             return NotFound();
 

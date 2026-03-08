@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using GraphicsSecureCommunicationApi.WebApi.Controllers;
 using GraphicsSecureCommunicationApi.WebApi.Models.Dto;
-using GraphicsSecureCommunicationApi.WebApi.Repositories.Interfaces;
 using GraphicsSecureCommunicationApi.WebApi.Services.Interfaces;
 
 namespace GraphicsSecureCommunicationApi.Tests;
@@ -11,17 +10,17 @@ namespace GraphicsSecureCommunicationApi.Tests;
 public sealed class EnvironmentsControllerTests
 {
     private EnvironmentsController _controller;
-    private Mock<IEnvironment2DRepository> _repository;
+    private Mock<IEnvironment2DService> _service;
     private Mock<IAuthenticationService> _authService;
     private const string TestUserId = "test-user-123";
 
     [TestInitialize]
     public void Setup()
     {
-        _repository = new Mock<IEnvironment2DRepository>();
+        _service = new Mock<IEnvironment2DService>();
         _authService = new Mock<IAuthenticationService>();
-        _controller = new EnvironmentsController(_repository.Object, _authService.Object);
-        
+        _controller = new EnvironmentsController(_service.Object, _authService.Object);
+
         _authService.Setup(x => x.GetCurrentAuthenticatedUserId()).Returns(TestUserId);
     }
 
@@ -35,7 +34,7 @@ public sealed class EnvironmentsControllerTests
             new() { Id = 2, Name = "Test Env 2", MaxHeight = 200, MaxLength = 200 }
         };
         
-        _repository.Setup(x => x.GetAllByUserIdAsync(TestUserId)).ReturnsAsync(environments);
+        _service.Setup(x => x.GetAllByUserIdAsync(TestUserId)).ReturnsAsync(environments);
 
         // Act
         var result = await _controller.GetAll();
@@ -74,7 +73,7 @@ public sealed class EnvironmentsControllerTests
             MaxLength = 100
         };
         
-        _repository.Setup(x => x.GetByIdAsync(1, TestUserId)).ReturnsAsync(environment);
+        _service.Setup(x => x.GetByIdAsync(1, TestUserId)).ReturnsAsync(environment);
 
         // Act
         var result = await _controller.GetById(1);
@@ -92,7 +91,7 @@ public sealed class EnvironmentsControllerTests
     public async Task GetById_WithInvalidId_ReturnsNotFound()
     {
         // Arrange
-        _repository.Setup(x => x.GetByIdAsync(999, TestUserId)).ReturnsAsync(null as Environment2DDto);
+        _service.Setup(x => x.GetByIdAsync(999, TestUserId)).ReturnsAsync(null as Environment2DDto);
 
         // Act
         var result = await _controller.GetById(999);
@@ -133,7 +132,7 @@ public sealed class EnvironmentsControllerTests
             MaxLength = 150
         };
 
-        _repository.Setup(x => x.CreateAsync(It.IsAny<Environment2DDto>(), TestUserId)).ReturnsAsync(createdEnvironment);
+        _service.Setup(x => x.CreateAsync(It.IsAny<Environment2DDto>(), TestUserId)).ReturnsAsync(createdEnvironment);
 
         // Act
         var result = await _controller.Create(newEnvironment);
@@ -174,7 +173,7 @@ public sealed class EnvironmentsControllerTests
             MaxLength = 200
         };
         
-        _repository.Setup(x => x.UpdateAsync(environment, TestUserId)).ReturnsAsync(true);
+        _service.Setup(x => x.UpdateAsync(environment, TestUserId)).ReturnsAsync(true);
 
         // Act
         var result = await _controller.Update(1, environment);
@@ -199,7 +198,7 @@ public sealed class EnvironmentsControllerTests
         var result = await _controller.Update(1, environment);
 
         // Assert
-        Assert.IsInstanceOfType<BadRequestResult>(result);
+        Assert.IsInstanceOfType<BadRequestObjectResult>(result);
     }
 
     [TestMethod]
@@ -214,7 +213,7 @@ public sealed class EnvironmentsControllerTests
             MaxLength = 200 
         };
         
-        _repository.Setup(x => x.UpdateAsync(environment, TestUserId)).ReturnsAsync(false);
+        _service.Setup(x => x.UpdateAsync(environment, TestUserId)).ReturnsAsync(false);
 
         // Act
         var result = await _controller.Update(999, environment);
@@ -227,7 +226,7 @@ public sealed class EnvironmentsControllerTests
     public async Task Delete_WithValidId_ReturnsNoContent()
     {
         // Arrange
-        _repository.Setup(x => x.DeleteAsync(1, TestUserId)).ReturnsAsync(true);
+        _service.Setup(x => x.DeleteAsync(1, TestUserId)).ReturnsAsync(true);
 
         // Act
         var result = await _controller.Delete(1);
@@ -240,7 +239,7 @@ public sealed class EnvironmentsControllerTests
     public async Task Delete_WithNonExistentEnvironment_ReturnsNotFound()
     {
         // Arrange
-        _repository.Setup(x => x.DeleteAsync(999, TestUserId)).ReturnsAsync(false);
+        _service.Setup(x => x.DeleteAsync(999, TestUserId)).ReturnsAsync(false);
 
         // Act
         var result = await _controller.Delete(999);

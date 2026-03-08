@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using GraphicsSecureCommunicationApi.WebApi.Controllers;
 using GraphicsSecureCommunicationApi.WebApi.Models.Dto;
-using GraphicsSecureCommunicationApi.WebApi.Repositories.Interfaces;
 using GraphicsSecureCommunicationApi.WebApi.Services.Interfaces;
 
 namespace GraphicsSecureCommunicationApi.Tests;
@@ -11,16 +10,16 @@ namespace GraphicsSecureCommunicationApi.Tests;
 public sealed class ObjectsControllerTests
 {
     private ObjectsController _controller;
-    private Mock<IObject2DRepository> _repository;
+    private Mock<IObject2DService> _service;
     private Mock<IAuthenticationService> _authService;
     private const string TestUserId = "test-user-123";
 
     [TestInitialize]
     public void Setup()
     {
-        _repository = new Mock<IObject2DRepository>();
+        _service = new Mock<IObject2DService>();
         _authService = new Mock<IAuthenticationService>();
-        _controller = new ObjectsController(_repository.Object, _authService.Object);
+        _controller = new ObjectsController(_service.Object, _authService.Object);
         
         _authService.Setup(x => x.GetCurrentAuthenticatedUserId()).Returns(TestUserId);
     }
@@ -35,7 +34,7 @@ public sealed class ObjectsControllerTests
             new() { Id = 2, EnvironmentId = 1, PositionX = 30, PositionY = 40 }
         };
         
-        _repository.Setup(x => x.GetAllByEnvironmentIdAsync(1, TestUserId)).ReturnsAsync(objects);
+        _service.Setup(x => x.GetAllByEnvironmentIdAsync(1, TestUserId)).ReturnsAsync(objects);
 
         // Act
         var result = await _controller.GetByEnvironmentId(1);
@@ -74,7 +73,7 @@ public sealed class ObjectsControllerTests
             PositionY = 20 
         };
         
-        _repository.Setup(x => x.GetByIdAsync(1, TestUserId)).ReturnsAsync(obj);
+        _service.Setup(x => x.GetByIdAsync(1, TestUserId)).ReturnsAsync(obj);
 
         // Act
         var result = await _controller.GetById(1);
@@ -92,7 +91,7 @@ public sealed class ObjectsControllerTests
     public async Task GetById_WithInvalidId_ReturnsNotFound()
     {
         // Arrange
-        _repository.Setup(x => x.GetByIdAsync(999, TestUserId)).ReturnsAsync(null as Object2DDto);
+        _service.Setup(x => x.GetByIdAsync(999, TestUserId)).ReturnsAsync(null as Object2DDto);
 
         // Act
         var result = await _controller.GetById(999);
@@ -137,7 +136,7 @@ public sealed class ObjectsControllerTests
             ScaleY = 1
         };
 
-        _repository.Setup(x => x.CreateAsync(It.IsAny<Object2DDto>(), TestUserId)).ReturnsAsync(createdObject);
+        _service.Setup(x => x.CreateAsync(It.IsAny<Object2DDto>(), TestUserId)).ReturnsAsync(createdObject);
 
         // Act
         var result = await _controller.Create(newObject);
@@ -155,7 +154,7 @@ public sealed class ObjectsControllerTests
         // Arrange
         var newObject = new Object2DDto { EnvironmentId = 1, PositionX = 10, PositionY = 20 };
 
-        _repository.Setup(x => x.CreateAsync(It.IsAny<Object2DDto>(), TestUserId))
+        _service.Setup(x => x.CreateAsync(It.IsAny<Object2DDto>(), TestUserId))
             .ThrowsAsync(new UnauthorizedAccessException("You don't have access to this environment."));
 
         // Act
@@ -191,7 +190,7 @@ public sealed class ObjectsControllerTests
             PositionY = 25 
         };
         
-        _repository.Setup(x => x.UpdateAsync(obj, TestUserId)).ReturnsAsync(true);
+        _service.Setup(x => x.UpdateAsync(obj, TestUserId)).ReturnsAsync(true);
 
         // Act
         var result = await _controller.Update(1, obj);
@@ -210,7 +209,7 @@ public sealed class ObjectsControllerTests
         var result = await _controller.Update(1, obj);
 
         // Assert
-        Assert.IsInstanceOfType<BadRequestResult>(result);
+        Assert.IsInstanceOfType<BadRequestObjectResult>(result);
     }
 
     [TestMethod]
@@ -219,7 +218,7 @@ public sealed class ObjectsControllerTests
         // Arrange
         var obj = new Object2DDto { Id = 999, EnvironmentId = 1, PositionX = 15, PositionY = 25 };
         
-        _repository.Setup(x => x.UpdateAsync(obj, TestUserId)).ReturnsAsync(false);
+        _service.Setup(x => x.UpdateAsync(obj, TestUserId)).ReturnsAsync(false);
 
         // Act
         var result = await _controller.Update(999, obj);
@@ -246,7 +245,7 @@ public sealed class ObjectsControllerTests
     public async Task Delete_WithValidId_ReturnsNoContent()
     {
         // Arrange
-        _repository.Setup(x => x.DeleteAsync(1, TestUserId)).ReturnsAsync(true);
+        _service.Setup(x => x.DeleteAsync(1, TestUserId)).ReturnsAsync(true);
 
         // Act
         var result = await _controller.Delete(1);
@@ -259,7 +258,7 @@ public sealed class ObjectsControllerTests
     public async Task Delete_WithNonExistentObject_ReturnsNotFound()
     {
         // Arrange
-        _repository.Setup(x => x.DeleteAsync(999, TestUserId)).ReturnsAsync(false);
+        _service.Setup(x => x.DeleteAsync(999, TestUserId)).ReturnsAsync(false);
 
         // Act
         var result = await _controller.Delete(999);

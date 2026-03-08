@@ -68,12 +68,16 @@ if (sqlConnectionStringFound)
     builder.Services.AddSingleton<IDbContext>(new DbContext(sqlConnectionString!));
 }
 
-// Register repositories for Environment2D and Object2D with SQL backend
+// Register repositories
 if (sqlConnectionStringFound)
 {
     builder.Services.AddTransient<IEnvironment2DRepository, SqlEnvironment2DRepository>();
     builder.Services.AddTransient<IObject2DRepository, SqlObject2DRepository>();
 }
+
+// Register services
+builder.Services.AddTransient<IEnvironment2DService, Environment2DService>();
+builder.Services.AddTransient<IObject2DService, Object2DService>();
 
 var app = builder.Build();
 

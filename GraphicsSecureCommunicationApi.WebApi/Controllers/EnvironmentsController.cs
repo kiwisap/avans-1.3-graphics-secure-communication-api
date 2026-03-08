@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using GraphicsSecureCommunicationApi.WebApi.Models.Dto;
-using GraphicsSecureCommunicationApi.WebApi.Repositories.Interfaces;
 using GraphicsSecureCommunicationApi.WebApi.Services.Interfaces;
 
 namespace GraphicsSecureCommunicationApi.WebApi.Controllers;
@@ -11,12 +10,12 @@ namespace GraphicsSecureCommunicationApi.WebApi.Controllers;
 [Authorize]
 public class EnvironmentsController : ControllerBase
 {
-    private readonly IEnvironment2DRepository _repository;
+    private readonly IEnvironment2DService _service;
     private readonly IAuthenticationService _authService;
 
-    public EnvironmentsController(IEnvironment2DRepository repository, IAuthenticationService authService)
+    public EnvironmentsController(IEnvironment2DService service, IAuthenticationService authService)
     {
-        _repository = repository;
+        _service = service;
         _authService = authService;
     }
 
@@ -27,7 +26,7 @@ public class EnvironmentsController : ControllerBase
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var environments = await _repository.GetAllByUserIdAsync(userId);
+        var environments = await _service.GetAllByUserIdAsync(userId);
         return Ok(environments);
     }
 
@@ -38,7 +37,7 @@ public class EnvironmentsController : ControllerBase
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var environment = await _repository.GetByIdAsync(id, userId);
+        var environment = await _service.GetByIdAsync(id, userId);
         if (environment == null)
             return NotFound();
 
@@ -52,8 +51,15 @@ public class EnvironmentsController : ControllerBase
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var created = await _repository.CreateAsync(environment, userId);
-        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+        try
+        {
+            var created = await _service.CreateAsync(environment, userId);
+            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpPut("{id}")]
@@ -64,13 +70,20 @@ public class EnvironmentsController : ControllerBase
             return Unauthorized();
 
         if (id != environment.Id)
-            return BadRequest();
+            return BadRequest("ID mismatch.");
 
-        var success = await _repository.UpdateAsync(environment, userId);
-        if (!success)
-            return NotFound();
+        try
+        {
+            var success = await _service.UpdateAsync(environment, userId);
+            if (!success)
+                return NotFound();
 
-        return NoContent();
+            return NoContent();
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpDelete("{id}")]
@@ -80,7 +93,7 @@ public class EnvironmentsController : ControllerBase
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var success = await _repository.DeleteAsync(id, userId);
+        var success = await _service.DeleteAsync(id, userId);
         if (!success)
             return NotFound();
 
