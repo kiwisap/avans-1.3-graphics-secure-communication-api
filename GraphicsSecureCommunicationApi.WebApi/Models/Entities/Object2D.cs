@@ -6,17 +6,17 @@ public class Object2D
 
     public int EnvironmentId { get; set; }
 
-    public int? PrefabId { get; set; }
+    public int PrefabId { get; set; }
 
-    public int PositionX { get; set; }
+    public float PositionX { get; set; }
 
-    public int PositionY { get; set; }
+    public float PositionY { get; set; }
 
-    public int ScaleX { get; set; }
+    public float ScaleX { get; set; }
 
-    public int ScaleY { get; set; }
+    public float ScaleY { get; set; }
 
-    public int RotationZ { get; set; }
+    public float RotationZ { get; set; }
 
     public int SortingLayer { get; set; }
 }
