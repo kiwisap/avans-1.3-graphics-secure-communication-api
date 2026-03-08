@@ -9,11 +9,18 @@ using GraphicsSecureCommunicationApi.WebApi.Services;
 using GraphicsSecureCommunicationApi.WebApi.Services.Interfaces;
 using System.Reflection;
 using GraphicsSecureCommunicationApi.WebApi.Data.Interfaces;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Register MVC controllers for handling HTTP requests.
 builder.Services.AddControllers();
+
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    // Configure JSON serialization to use camelCase for property names.
+    options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+});
 
 // Retrieve the SQL connection string from configuration.
 var sqlConnectionString = builder.Configuration.GetValue<string>("SqlConnectionString");
@@ -40,7 +47,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddIdentityApiEndpoints<IdentityUser>(options =>
 {
     options.User.RequireUniqueEmail = true;
-    options.Password.RequiredLength = 8;
+    options.Password.RequiredLength = 10;
 })
 .AddRoles<IdentityRole>()
 .AddDapperStores(options =>
