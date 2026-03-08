@@ -1,12 +1,14 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi;
-using GraphicsSecureCommunicationApi.WebApi.Repositories;
-using GraphicsSecureCommunicationApi.WebApi.Services;
+using GraphicsSecureCommunicationApi.WebApi.Data;
 using GraphicsSecureCommunicationApi.WebApi.Mapping;
-using System.Reflection;
 using GraphicsSecureCommunicationApi.WebApi.Mapping.Interfaces;
+using GraphicsSecureCommunicationApi.WebApi.Repositories;
 using GraphicsSecureCommunicationApi.WebApi.Repositories.Interfaces;
+using GraphicsSecureCommunicationApi.WebApi.Services;
 using GraphicsSecureCommunicationApi.WebApi.Services.Interfaces;
+using System.Reflection;
+using GraphicsSecureCommunicationApi.WebApi.Data.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,17 +62,17 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddTransient<IEnvironment2DMappingService, Environment2DMappingService>();
 builder.Services.AddTransient<IObject2DMappingService, Object2DMappingService>();
 
+// Register DbContext for managing database connections
+if (sqlConnectionStringFound)
+{
+    builder.Services.AddSingleton<IDbContext>(new DbContext(sqlConnectionString!));
+}
+
 // Register repositories for Environment2D and Object2D with SQL backend
 if (sqlConnectionStringFound)
 {
-    builder.Services.AddTransient<IEnvironment2DRepository>(o => 
-        new SqlEnvironment2DRepository(
-            sqlConnectionString!, 
-            o.GetRequiredService<IEnvironment2DMappingService>()));
-    builder.Services.AddTransient<IObject2DRepository>(o => 
-        new SqlObject2DRepository(
-            sqlConnectionString!, 
-            o.GetRequiredService<IObject2DMappingService>()));
+    builder.Services.AddTransient<IEnvironment2DRepository, SqlEnvironment2DRepository>();
+    builder.Services.AddTransient<IObject2DRepository, SqlObject2DRepository>();
 }
 
 var app = builder.Build();

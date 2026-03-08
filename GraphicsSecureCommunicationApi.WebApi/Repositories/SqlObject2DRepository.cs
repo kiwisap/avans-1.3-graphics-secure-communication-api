@@ -1,28 +1,28 @@
 using Dapper;
-using Microsoft.Data.SqlClient;
-using GraphicsSecureCommunicationApi.WebApi.Models.Entities;
-using GraphicsSecureCommunicationApi.WebApi.Models.Dto;
+using GraphicsSecureCommunicationApi.WebApi.Data.Interfaces;
 using GraphicsSecureCommunicationApi.WebApi.Mapping.Interfaces;
+using GraphicsSecureCommunicationApi.WebApi.Models.Dto;
+using GraphicsSecureCommunicationApi.WebApi.Models.Entities;
 using GraphicsSecureCommunicationApi.WebApi.Repositories.Interfaces;
 
 namespace GraphicsSecureCommunicationApi.WebApi.Repositories;
 
 public class SqlObject2DRepository : IObject2DRepository
 {
-    private readonly string _connectionString;
+    private readonly IDbContext _dbContext;
     private readonly IObject2DMappingService _object2DMappingService;
 
     public SqlObject2DRepository(
-        string connectionString,
+        IDbContext dbContext,
         IObject2DMappingService object2DMappingService)
     {
-        _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
+        _dbContext = dbContext;
         _object2DMappingService = object2DMappingService;
     }
 
     public async Task<IEnumerable<Object2DDto>> GetAllByEnvironmentIdAsync(int environmentId, string userId)
     {
-        using var connection = new SqlConnection(_connectionString);
+        using var connection = _dbContext.CreateConnection();
         var sql = @"
             SELECT o.* 
             FROM Object2D o
@@ -35,7 +35,7 @@ public class SqlObject2DRepository : IObject2DRepository
 
     public async Task<Object2DDto?> GetByIdAsync(int id, string userId)
     {
-        using var connection = new SqlConnection(_connectionString);
+        using var connection = _dbContext.CreateConnection();
         var sql = @"
             SELECT o.* 
             FROM Object2D o
@@ -48,7 +48,7 @@ public class SqlObject2DRepository : IObject2DRepository
 
     public async Task<Object2DDto> CreateAsync(Object2DDto obj, string userId)
     {
-        using var connection = new SqlConnection(_connectionString);
+        using var connection = _dbContext.CreateConnection();
 
         var checkSql = "SELECT COUNT(1) FROM Environment2D WHERE Id = @EnvironmentId AND UserId = @UserId";
         var isAuthorized = await connection.ExecuteScalarAsync<int>(checkSql, new { obj.EnvironmentId, UserId = userId }) > 0;
@@ -69,7 +69,7 @@ public class SqlObject2DRepository : IObject2DRepository
 
     public async Task<bool> UpdateAsync(Object2DDto obj, string userId)
     {
-        using var connection = new SqlConnection(_connectionString);
+        using var connection = _dbContext.CreateConnection();
         var sql = @"
             UPDATE o
             SET o.PrefabId = @PrefabId, 
@@ -102,13 +102,13 @@ public class SqlObject2DRepository : IObject2DRepository
 
     public async Task<bool> DeleteAsync(int id, string userId)
     {
-        using var connection = new SqlConnection(_connectionString);
+        using var connection = _dbContext.CreateConnection();
         var sql = @"
             DELETE o
             FROM Object2D o
             INNER JOIN Environment2D e ON o.EnvironmentId = e.Id
             WHERE o.Id = @Id AND e.UserId = @UserId";
-        
+
         var rowsAffected = await connection.ExecuteAsync(sql, new { Id = id, UserId = userId });
         return rowsAffected > 0;
     }
