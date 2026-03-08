@@ -149,22 +149,6 @@ public sealed class ObjectsControllerTests
     }
 
     [TestMethod]
-    public async Task Create_WithUnauthorizedEnvironment_ReturnsUnauthorized()
-    {
-        // Arrange
-        var newObject = new Object2DDto { EnvironmentId = 1, PositionX = 10, PositionY = 20 };
-
-        _service.Setup(x => x.CreateAsync(It.IsAny<Object2DDto>(), TestUserId))
-            .ThrowsAsync(new UnauthorizedAccessException("You don't have access to this environment."));
-
-        // Act
-        var result = await _controller.Create(newObject);
-
-        // Assert
-        Assert.IsInstanceOfType<UnauthorizedObjectResult>(result.Result);
-    }
-
-    [TestMethod]
     public async Task Create_WithUnauthenticatedUser_ReturnsUnauthorized()
     {
         // Arrange

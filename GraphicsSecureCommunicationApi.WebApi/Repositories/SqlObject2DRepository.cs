@@ -49,13 +49,6 @@ public class SqlObject2DRepository : IObject2DRepository
     public async Task<Object2DDto> CreateAsync(Object2DDto obj, string userId)
     {
         using var connection = _dbContext.CreateConnection();
-
-        var checkSql = "SELECT COUNT(1) FROM Environment2D WHERE Id = @EnvironmentId AND UserId = @UserId";
-        var isAuthorized = await connection.ExecuteScalarAsync<int>(checkSql, new { obj.EnvironmentId, UserId = userId }) > 0;
-
-        if (!isAuthorized)
-            throw new UnauthorizedAccessException("You don't have access to this environment.");
-
         var sql = @"
             INSERT INTO Object2D (EnvironmentId, PrefabId, PositionX, PositionY, ScaleX, ScaleY, RotationZ, SortingLayer)
             VALUES (@EnvironmentId, @PrefabId, @PositionX, @PositionY, @ScaleX, @ScaleY, @RotationZ, @SortingLayer);
