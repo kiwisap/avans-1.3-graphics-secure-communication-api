@@ -70,9 +70,6 @@ public class Object2DService : IObject2DService
                 $"PositionY must be between 0 and {environment.MaxHeight} (environment MaxHeight).", 
                 nameof(obj.PositionY));
 
-        if (obj.ScaleX <= 0)
-            throw new ArgumentException("ScaleX must be greater than 0.", nameof(obj.ScaleX));
-
         if (obj.ScaleY <= 0)
             throw new ArgumentException("ScaleY must be greater than 0.", nameof(obj.ScaleY));
 
