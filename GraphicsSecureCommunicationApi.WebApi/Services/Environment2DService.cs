@@ -15,10 +15,14 @@ public class Environment2DService : IEnvironment2DService
     private const int MaxEnvironmentsPerUser = 5;
 
     private readonly IEnvironment2DRepository _repository;
+    private readonly IObject2DRepository _objectRepository;
 
-    public Environment2DService(IEnvironment2DRepository repository)
+    public Environment2DService(
+        IEnvironment2DRepository repository,
+        IObject2DRepository objectRepository)
     {
         _repository = repository;
+        _objectRepository = objectRepository;
     }
 
     public async Task<IEnumerable<Environment2DDto>> GetAllByUserIdAsync(string userId)
@@ -52,6 +56,19 @@ public class Environment2DService : IEnvironment2DService
 
     public async Task<bool> DeleteAsync(int id, string userId)
     {
+        // First, verify the environment exists and belongs to the user
+        var environment = await _repository.GetByIdAsync(id, userId);
+        if (environment == null)
+            return false;
+
+        // Delete all objects in this environment first
+        var objects = await _objectRepository.GetAllByEnvironmentIdAsync(id, userId);
+        foreach (var obj in objects)
+        {
+            await _objectRepository.DeleteAsync(obj.Id, userId);
+        }
+
+        // Then delete the environment itself
         return await _repository.DeleteAsync(id, userId);
     }
 
